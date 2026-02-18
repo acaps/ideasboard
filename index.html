@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Josh.ai Ideas Board</title>
+  <meta name="description" content="Submit ideas. Vote them up or down. See what rises to the top." />
+  <style>
+    :root{
+      --bg:#070A12;
+      --card:rgba(255,255,255,.06);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.66);
+      --line:rgba(255,255,255,.12);
+      --shadow: 0 14px 40px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 14px;
+      --max: 1100px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(90,140,255,.22), transparent 60%),
+        radial-gradient(900px 600px at 100% 0%, rgba(170,90,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 70% 120%, rgba(90,255,170,.12), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+    .wrap{ max-width: var(--max); margin: 0 auto; padding: 28px 18px 46px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:flex-start; gap: 18px; margin-bottom: 16px; }
+    .brand{ display:flex; flex-direction:column; gap:8px; }
+    .title{ font-size: 28px; letter-spacing: .2px; margin:0; display:flex; align-items:center; gap:10px; }
+    .pill{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      color: var(--muted);
+      width: fit-content;
+    }
+    .subtitle{ margin:0; color: var(--muted); line-height: 1.35; max-width: 70ch; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+    @media (min-width: 980px){
+      .grid{ grid-template-columns: 420px 1fr; gap: 18px; }
+      .topbar{ align-items:center; }
+      .title{ font-size: 30px; }
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.045));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHeader{
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+    }
+    .cardBody{ padding: 16px; }
+    .cardHeader h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.3px;
+      color: var(--muted);
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+    label{ display:block; font-size: 13px; color: var(--muted); margin: 10px 0 8px; }
+    input, textarea{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+    textarea{ min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus{
+      border-color: rgba(125, 180, 255, .55);
+      box-shadow: 0 0 0 4px rgba(125,180,255,.12);
+    }
+    .btnRow{ display:flex; gap: 10px; align-items:center; margin-top: 12px; flex-wrap:wrap; }
+    button{
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+    button.primary{
+      background: linear-gradient(180deg, rgba(125,180,255,.28), rgba(125,180,255,.12));
+      border-color: rgba(125,180,255,.35);
+    }
+    button:disabled{ opacity: .55; cursor: not-allowed; }
+    .hint{ margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.35; }
+
+    .metaRow{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .chip{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      color: var(--muted);
+    }
+    .chip button{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .ideas{ padding: 10px; display:flex; flex-direction:column; gap: 10px; }
+    .idea{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      border-radius: var(--radius2);
+      padding: 12px;
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+    }
+    .voteCol{
+      display:flex; flex-direction:column; gap: 8px; min-width: 92px; align-items:center;
+      padding: 6px 6px; border-radius: 14px; background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .score{ font-family: var(--mono); font-size: 18px; letter-spacing: .4px; }
+    .score small{ display:block; font-size: 11px; color: var(--muted); margin-top: 2px; text-align:center; }
+    .voteBtns{ display:flex; gap: 8px; }
+    .voteBtn{
+      width: 34px; height: 34px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:center;
+      font-size: 16px; user-select:none;
+    }
+    .voteBtn.up:hover{ border-color: rgba(90,255,170,.5); box-shadow: 0 0 0 4px rgba(90,255,170,.12); }
+    .voteBtn.down:hover{ border-color: rgba(255,120,120,.5); box-shadow: 0 0 0 4px rgba(255,120,120,.10); }
+    .voteBtn.disabled{ opacity: .45; cursor:not-allowed; }
+    .voteBtn.disabled:hover{ box-shadow:none; }
+
+    .ideaMain{ flex:1; display:flex; flex-direction:column; gap: 6px; padding-top: 2px; }
+    .ideaTitle{ margin:0; font-size: 16px; letter-spacing: .15px; line-height: 1.25; }
+    .ideaDesc{ margin:0; color: rgba(255,255,255,.74); line-height: 1.35; font-size: 14px; white-space: pre-wrap; }
+    .ideaFoot{ display:flex; gap: 10px; align-items:center; margin-top: 6px; color: var(--muted); font-size: 12px; font-family: var(--mono); flex-wrap:wrap; }
+
+    .pager{
+      display:flex; justify-content:space-between; align-items:center; gap: 10px;
+      padding: 12px 16px 16px; border-top: 1px solid var(--line); background: rgba(255,255,255,.02);
+    }
+    .pager .pageInfo{ color: var(--muted); font-family: var(--mono); font-size: 12px; }
+    .pager button{ padding: 9px 12px; border-radius: 12px; }
+
+    .toast{
+      position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+      background: rgba(0,0,0,.65);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+      max-width: min(720px, calc(100vw - 24px));
+      text-align:center;
+      font-size: 13px;
+    }
+    .toast.show{ opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1 class="title">Josh.ai Ideas Board</h1>
+        <div class="pill">Submit • Vote • Sort by signal</div>
+        <p class="subtitle">
+          Static demo (no backend). Ideas + votes are stored in your browser only.
+          Each idea can be voted once per browser.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="cardHeader"><h2>Submit an idea</h2></div>
+        <div class="cardBody">
+          <label for="title">Title</label>
+          <input id="title" maxlength="120" placeholder="A short, specific idea title" />
+
+          <label for="desc">Description</label>
+          <textarea id="desc" maxlength="2000" placeholder="Explain the idea in a couple sentences..."></textarea>
+
+          <div class="btnRow">
+            <button class="primary" id="submitBtn">Submit</button>
+            <button id="clearBtn" type="button">Clear</button>
+          </div>
+          <p class="hint">
+            This is a UI-only prototype. If you open the page in a different browser/device, it will look empty.
+          </p>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHeader">
+          <h2>Top ideas</h2>
+          <div class="metaRow">
+            <span class="chip" id="listMeta">0 ideas</span>
+            <button id="resetBtn" title="Clears local demo data">Reset demo</button>
+          </div>
+        </div>
+
+        <div class="ideas" id="ideas"></div>
+
+        <div class="pager">
+          <button id="prevBtn">Prev</button>
+          <div class="pageInfo" id="pageInfo">Page 1</div>
+          <button id="nextBtn">Next</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const STORAGE_KEY = "josh_ideas_demo_v1";
+  const VOTES_KEY = "josh_ideas_votes_v1";
+  const PAGE_SIZE = 20;
+
+  let state = {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    ideas: []
+  };
+
+  const elIdeas = document.getElementById("ideas");
+  const elListMeta = document.getElementById("listMeta");
+  const elPageInfo = document.getElementById("pageInfo");
+  const elPrev = document.getElementById("prevBtn");
+  const elNext = document.getElementById("nextBtn");
+  const elToast = document.getElementById("toast");
+
+  const elTitle = document.getElementById("title");
+  const elDesc = document.getElementById("desc");
+  const elSubmit = document.getElementById("submitBtn");
+  const elClear = document.getElementById("clearBtn");
+  const elReset = document.getElementById("resetBtn");
+
+  function showToast(msg) {
+    elToast.textContent = msg;
+    elToast.classList.add("show");
+    setTimeout(() => elToast.classList.remove("show"), 2200);
+  }
+
+  function fmtDate(ms) {
+    const d = new Date(ms);
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  }
+
+  function loadAllIdeas() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const ideas = raw ? JSON.parse(raw) : [];
+      return Array.isArray(ideas) ? ideas : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveAllIdeas(ideas) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  }
+
+  function loadVotesMap() {
+    try {
+      const raw = localStorage.getItem(VOTES_KEY);
+      const map = raw ? JSON.parse(raw) : {};
+      return map && typeof map === "object" ? map : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveVotesMap(map) {
+    localStorage.setItem(VOTES_KEY, JSON.stringify(map));
+  }
+
+  function sortIdeas(ideas) {
+    // score desc, then created_at desc
+    return [...ideas].sort((a,b) => (b.score - a.score) || (b.created_at - a.created_at));
+  }
+
+  function paginate(ideas, page) {
+    const total = ideas.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const p = Math.min(Math.max(1, page), totalPages);
+    const start = (p - 1) * PAGE_SIZE;
+    return {
+      page: p,
+      total,
+      totalPages,
+      ideas: ideas.slice(start, start + PAGE_SIZE)
+    };
+  }
+
+  function refresh(page = state.page) {
+    const all = sortIdeas(loadAllIdeas());
+    const paged = paginate(all, page);
+    state = { ...state, ...paged };
+    render();
+  }
+
+  function render() {
+    elIdeas.innerHTML = "";
+
+    elListMeta.textContent = `${state.total} idea${state.total === 1 ? "" : "s"} • ${PAGE_SIZE} per page`;
+    elPageInfo.textContent = `Page ${state.page} of ${state.totalPages}`;
+
+    elPrev.disabled = state.page <= 1;
+    elNext.disabled = state.page >= state.totalPages;
+
+    const votesMap = loadVotesMap();
+
+    if (!state.ideas.length) {
+      const empty = document.createElement("div");
+      empty.className = "idea";
+      empty.innerHTML = `
+        <div class="ideaMain">
+          <h3 class="ideaTitle">No ideas yet</h3>
+          <p class="ideaDesc">Submit something on the left to see how it looks here.</p>
+        </div>
+      `;
+      elIdeas.appendChild(empty);
+      return;
+    }
+
+    for (const idea of state.ideas) {
+      const row = document.createElement("div");
+      row.className = "idea";
+
+      const votesLine = `${idea.upvotes} up • ${idea.downvotes} down`;
+      const hasVoted = !!votesMap[String(idea.id)];
+
+      row.innerHTML = `
+        <div class="voteCol">
+          <div class="score">${idea.score}<small>${votesLine}</small></div>
+          <div class="voteBtns">
+            <div class="voteBtn up ${hasVoted ? "disabled" : ""}" title="Upvote" role="button" aria-label="Upvote">▲</div>
+            <div class="voteBtn down ${hasVoted ? "disabled" : ""}" title="Downvote" role="button" aria-label="Downvote">▼</div>
+          </div>
+        </div>
+        <div class="ideaMain">
+          <h3 class="ideaTitle"></h3>
+          <p class="ideaDesc"></p>
+          <div class="ideaFoot">
+            <span>#${idea.id}</span>
+            <span>•</span>
+            <span>${fmtDate(idea.created_at)}</span>
+            ${hasVoted ? `<span>•</span><span>voted</span>` : ``}
+          </div>
+        </div>
+      `;
+
+      row.querySelector(".ideaTitle").textContent = idea.title;
+      row.querySelector(".ideaDesc").textContent = idea.description;
+
+      const upBtn = row.querySelector(".voteBtn.up");
+      const downBtn = row.querySelector(".voteBtn.down");
+
+      upBtn.addEventListener("click", () => { if (!hasVoted) vote(idea.id, 1); });
+      downBtn.addEventListener("click", () => { if (!hasVoted) vote(idea.id, -1); });
+
+      elIdeas.appendChild(row);
+    }
+  }
+
+  function nextIdeaId(ideas) {
+    let max = 0;
+    for (const i of ideas) max = Math.max(max, i.id || 0);
+    return max + 1;
+  }
+
+  function submitIdea() {
+    const title = elTitle.value.trim();
+    const description = elDesc.value.trim();
+
+    if (title.length < 3 || title.length > 120) return showToast("Title must be 3–120 characters.");
+    if (description.length < 10 || description.length > 2000) return showToast("Description must be 10–2000 characters.");
+
+    const ideas = loadAllIdeas();
+    const id = nextIdeaId(ideas);
+
+    ideas.push({
+      id,
+      title,
+      description,
+      score: 0,
+      upvotes: 0,
+      downvotes: 0,
+      created_at: Date.now()
+    });
+
+    saveAllIdeas(ideas);
+    elTitle.value = "";
+    elDesc.value = "";
+    showToast("Idea submitted.");
+    refresh(1); // go to first page so it can compete
+  }
+
+  function vote(ideaId, value) {
+    const votesMap = loadVotesMap();
+    const key = String(ideaId);
+
+    if (votesMap[key]) {
+      showToast("You already voted on this idea.");
+      return;
+    }
+
+    const ideas = loadAllIdeas();
+    const idx = ideas.findIndex(i => i.id === ideaId);
+    if (idx === -1) return showToast("Idea not found.");
+
+    if (value === 1) {
+      ideas[idx].score += 1;
+      ideas[idx].upvotes += 1;
+    } else {
+      ideas[idx].score -= 1;
+      ideas[idx].downvotes += 1;
+    }
+
+    votesMap[key] = value;
+    saveVotesMap(votesMap);
+    saveAllIdeas(ideas);
+
+    showToast(value === 1 ? "Upvoted." : "Downvoted.");
+    refresh(state.page);
+  }
+
+  function clearForm() {
+    elTitle.value = "";
+    elDesc.value = "";
+  }
+
+  function resetDemo() {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(VOTES_KEY);
+    showToast("Demo reset.");
+    refresh(1);
+  }
+
+  elSubmit.addEventListener("click", submitIdea);
+  elClear.addEventListener("click", clearForm);
+  elReset.addEventListener("click", resetDemo);
+
+  elPrev.addEventListener("click", () => refresh(state.page - 1));
+  elNext.addEventListener("click", () => refresh(state.page + 1));
+
+  // Seed with a few ideas the first time (optional)
+  (function seedIfEmpty(){
+    const ideas = loadAllIdeas();
+    if (ideas.length) return;
+
+    const seed = [
+      { title: "Room-level personalization", description: "Let users set different wake words, voices, and response styles per room, so the home feels tailored without extra setup." },
+      { title: "Idea status labels", description: "Add states like Under Review, Planned, In Progress, Shipped. People love seeing progress, even if it’s just a quick tag." },
+      { title: "Shareable idea links", description: "Give each idea a permalink so users can share it and rally votes without hunting through pages." }
+    ];
+
+    const now = Date.now();
+    const seeded = seed.map((s, i) => ({
+      id: i + 1,
+      title: s.title,
+      description: s.description,
+      score: 0,
+      upvotes: 0,
+      downvotes: 0,
+      created_at: now - (i * 86400000)
+    }));
+
+    saveAllIdeas(seeded);
+  })();
+
+  refresh(1);
+</script>
+</body>
+</html>
