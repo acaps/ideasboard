@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Josh.ai Ideas Board</title>
+  <meta name="description" content="Submit ideas. Vote them up or down. See what rises to the top." />
+
+  <!-- Modern UI font similar to the screenshot -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --text: #0b0f19;
+      --muted: rgba(11,15,25,.62);
+      --border: rgba(15,23,42,.12);
+      --borderStrong: rgba(15,23,42,.16);
+      --shadow: 0 10px 28px rgba(15,23,42,.08);
+      --shadow2: 0 18px 50px rgba(15,23,42,.14);
+      --radius: 16px;
+      --radius2: 14px;
+      --max: 1080px;
+
+      --sans: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --focus: rgba(17,24,39,.22);
+      --focusRing: rgba(17,24,39,.10);
+
+      --cta: #0b0f19;
+      --ctaText: #ffffff;
+
+      --chip: rgba(15,23,42,.06);
+      --chipText: rgba(11,15,25,.72);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 28px 16px 56px;
+    }
+
+    /* Top line: title + search + submit */
+    .topline{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 16px;
+    }
+
+    .title{
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      margin:0;
+      line-height: 1.1;
+      white-space:nowrap;
+    }
+
+    .searchWrap{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      flex: 1 1 420px;
+      min-width: min(520px, 100%);
+      box-shadow: 0 1px 0 rgba(15,23,42,.03);
+    }
+
+    .searchIcon{
+      font-family: var(--mono);
+      color: rgba(11,15,25,.45);
+      font-size: 12px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .searchWrap input{
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      padding: 0;
+      height: 40px;
+    }
+    .searchWrap input::placeholder{ color: rgba(11,15,25,.38); }
+
+    .spacer{ flex: 1 1 auto; }
+
+    button{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 600;
+      letter-spacing: -0.1px;
+      font-family: var(--sans);
+      white-space:nowrap;
+      height: 42px;
+      box-shadow: 0 1px 0 rgba(15,23,42,.03);
+    }
+    button:hover{ border-color: var(--borderStrong); }
+    button:disabled{ opacity: .55; cursor: not-allowed; }
+
+    button.primary{
+      background: var(--cta);
+      border-color: var(--cta);
+      color: var(--ctaText);
+      box-shadow: 0 10px 20px rgba(0,0,0,.10);
+    }
+    button.primary:hover{
+      filter: brightness(0.95);
+    }
+
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHeader{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+
+    .cardHeaderLeft{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
+    .cardHeader h2{
+      margin:0;
+      font-size: 13px;
+      letter-spacing: .2px;
+      color: rgba(11,15,25,.70);
+      font-family: var(--mono);
+      text-transform: uppercase;
+      white-space:nowrap;
+    }
+
+    .seg{
+      display:flex;
+      align-items:center;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 12px;
+      overflow:hidden;
+      height: 34px;
+      box-shadow: 0 1px 0 rgba(15,23,42,.03);
+    }
+    .seg button{
+      height: 34px;
+      border: none;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      padding: 7px 10px;
+      background: transparent;
+      font-size: 13px;
+      color: rgba(11,15,25,.72);
+      box-shadow: none;
+      font-weight: 600;
+    }
+    .seg button:last-child{ border-right:none; }
+    .seg button.active{
+      background: var(--chip);
+      color: rgba(11,15,25,.92);
+    }
+
+    .listMeta{
+      font-size: 13px;
+      color: rgba(11,15,25,.55);
+      font-family: var(--mono);
+      white-space:nowrap;
+    }
+
+    .ideas{
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .idea{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: var(--radius2);
+      padding: 12px;
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+    }
+
+    .voteCol{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      min-width: 96px;
+      align-items:center;
+      padding: 8px 8px;
+      border-radius: 12px;
+      background: rgba(15,23,42,.03);
+      border: 1px solid rgba(15,23,42,.08);
+      flex: 0 0 auto;
+    }
+
+    .score{
+      font-family: var(--mono);
+      font-size: 16px;
+      letter-spacing: .2px;
+      text-align:center;
+      color: rgba(11,15,25,.92);
+    }
+
+    .score small{
+      display:block;
+      font-size: 11px;
+      color: rgba(11,15,25,.52);
+      margin-top: 2px;
+      text-align:center;
+    }
+
+    .voteBtns{ display:flex; gap: 8px; }
+
+    .voteBtn{
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: #fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 16px;
+      user-select:none;
+      color: rgba(11,15,25,.85);
+    }
+    .voteBtn:hover{
+      border-color: rgba(15,23,42,.22);
+      box-shadow: 0 6px 14px rgba(15,23,42,.08);
+    }
+
+    .voteBtn.disabled{ opacity: .45; cursor:not-allowed; }
+    .voteBtn.disabled:hover{ box-shadow:none; }
+
+    .ideaMain{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      padding-top: 1px;
+      min-width: 0;
+    }
+
+    .ideaTitle{
+      margin:0;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: -0.15px;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .ideaDesc{
+      margin:0;
+      color: rgba(11,15,25,.70);
+      line-height: 1.45;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .ideaFoot{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      margin-top: 6px;
+      color: rgba(11,15,25,.55);
+      font-size: 12px;
+      font-family: var(--mono);
+      flex-wrap:wrap;
+    }
+
+    .pager{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .pager .pageInfo{
+      color: rgba(11,15,25,.55);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    /* Toast only for errors like "already voted" */
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: rgba(11,15,25,.92);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+      max-width: min(720px, calc(100vw - 24px));
+      text-align:center;
+      font-size: 13px;
+      z-index: 50;
+    }
+    .toast.show{ opacity: 1; }
+
+    /* Modal */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modalOverlay.open{ display:flex; }
+
+    .modal{
+      width: min(720px, 100%);
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid var(--border);
+      background: #ffffff; /* solid */
+      box-shadow: var(--shadow2);
+    }
+    .modalHead{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+    }
+    .modalHead h3{
+      margin:0;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing:.2px;
+      font-size: 13px;
+      color: rgba(11,15,25,.62);
+    }
+    .modalBody{ padding: 16px; }
+
+    label{
+      display:block;
+      font-size: 13px;
+      color: rgba(11,15,25,.62);
+      margin: 10px 0 8px;
+      font-weight: 600;
+      letter-spacing: -0.1px;
+    }
+
+    .modalBody input, .modalBody textarea{
+      width:100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      font-size: 14px;
+      font-family: var(--sans);
+      box-shadow: 0 1px 0 rgba(15,23,42,.03);
+    }
+    .modalBody textarea{ min-height: 140px; resize: vertical; }
+
+    .modalBody input:focus, .modalBody textarea:focus{
+      border-color: rgba(15,23,42,.26);
+      box-shadow: 0 0 0 4px rgba(15,23,42,.08);
+    }
+
+    .modalActions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      margin-top: 12px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 720px){
+      .searchWrap{ min-width: 100%; }
+      .title{ font-size: 20px; }
+    }
+    @media (max-width: 560px){
+      .voteCol{ min-width: 86px; }
+      .idea{ padding: 10px; }
+      .wrap{ padding: 22px 14px 46px; }
+      .seg{ width: 100%; }
+      .seg button{ width: 50%; }
+      .cardHeader{ align-items:flex-start; }
+      .cardHeaderLeft{ width: 100%; }
+      button.primary{ width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="topline">
+      <h1 class="title">Josh.ai Ideas Board</h1>
+
+      <div class="searchWrap" aria-label="Search">
+        <span class="searchIcon">Search</span>
+        <input id="searchInput" type="search" placeholder="Title, description, or name" />
+      </div>
+
+      <div class="spacer"></div>
+
+      <button class="primary" id="openSubmit" type="button">Submit Idea</button>
+    </div>
+
+    <section class="card">
+      <div class="cardHeader">
+        <div class="cardHeaderLeft">
+          <h2 id="listHeading">Top ideas</h2>
+          <div class="seg" aria-label="Sort toggle">
+            <button id="toggleTop" class="active" type="button">Top</button>
+            <button id="toggleNew" type="button">New</button>
+          </div>
+        </div>
+
+        <div class="listMeta" id="listMeta">Loading…</div>
+      </div>
+
+      <div class="ideas" id="ideas"></div>
+
+      <div class="pager">
+        <button id="prevBtn" type="button">Prev</button>
+        <div class="pageInfo" id="pageInfo">Page 1</div>
+        <button id="nextBtn" type="button">Next</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div class="modalOverlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="submitTitle">
+      <div class="modalHead">
+        <h3 id="submitTitle">Submit an idea</h3>
+        <button id="closeSubmit" type="button">Close</button>
+      </div>
+      <div class="modalBody">
+        <label for="name">Name</label>
+        <input id="name" maxlength="60" placeholder="Your name" />
+
+        <label for="title">Title</label>
+        <input id="title" maxlength="120" placeholder="A short, specific idea title" />
+
+        <label for="desc">Description</label>
+        <textarea id="desc" maxlength="2000" placeholder="Explain the idea in a couple sentences..."></textarea>
+
+        <div class="modalActions">
+          <button id="cancelBtn" type="button">Cancel</button>
+          <button class="primary" id="submitBtn" type="button">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const STORAGE_KEY = "josh_ideas_demo_light_v1";
+  const VOTES_KEY = "josh_ideas_votes_light_v1";
+  const PAGE_SIZE = 20;
+
+  const state = {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    ideas: [],
+    sortMode: "top", // "top" | "new"
+    query: ""
+  };
+
+  const elIdeas = document.getElementById("ideas");
+  const elListMeta = document.getElementById("listMeta");
+  const elPageInfo = document.getElementById("pageInfo");
+  const elPrev = document.getElementById("prevBtn");
+  const elNext = document.getElementById("nextBtn");
+  const elToast = document.getElementById("toast");
+  const elHeading = document.getElementById("listHeading");
+
+  const overlay = document.getElementById("modalOverlay");
+  const btnOpen = document.getElementById("openSubmit");
+  const btnClose = document.getElementById("closeSubmit");
+  const btnCancel = document.getElementById("cancelBtn");
+  const btnSubmit = document.getElementById("submitBtn");
+
+  const elName = document.getElementById("name");
+  const elTitle = document.getElementById("title");
+  const elDesc = document.getElementById("desc");
+
+  const btnTop = document.getElementById("toggleTop");
+  const btnNew = document.getElementById("toggleNew");
+  const elSearch = document.getElementById("searchInput");
+
+  function showToast(msg) {
+    elToast.textContent = msg;
+    elToast.classList.add("show");
+    setTimeout(() => elToast.classList.remove("show"), 2000);
+  }
+
+  function fmtDate(ms) {
+    const d = new Date(ms);
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  }
+
+  function loadAllIdeas() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const ideas = raw ? JSON.parse(raw) : [];
+      return Array.isArray(ideas) ? ideas : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveAllIdeas(ideas) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  }
+
+  function loadVotesMap() {
+    try {
+      const raw = localStorage.getItem(VOTES_KEY);
+      const map = raw ? JSON.parse(raw) : {};
+      return map && typeof map === "object" ? map : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveVotesMap(map) {
+    localStorage.setItem(VOTES_KEY, JSON.stringify(map));
+  }
+
+  function normalize(s) {
+    return String(s || "").toLowerCase().trim();
+  }
+
+  function filterIdeas(ideas, query) {
+    const q = normalize(query);
+    if (!q) return ideas;
+    return ideas.filter(i => normalize([i.title, i.description, i.name].join(" ")).includes(q));
+  }
+
+  function sortIdeas(ideas) {
+    const arr = [...ideas];
+    if (state.sortMode === "new") {
+      arr.sort((a,b) => (b.created_at - a.created_at) || (b.score - a.score));
+      return arr;
+    }
+    arr.sort((a,b) => (b.score - a.score) || (b.created_at - a.created_at));
+    return arr;
+  }
+
+  function paginate(ideas, page) {
+    const total = ideas.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const p = Math.min(Math.max(1, page), totalPages);
+    const start = (p - 1) * PAGE_SIZE;
+    return { page: p, total, totalPages, ideas: ideas.slice(start, start + PAGE_SIZE) };
+  }
+
+  function refresh(page = state.page) {
+    const all = loadAllIdeas();
+    const filtered = filterIdeas(all, state.query);
+    const sorted = sortIdeas(filtered);
+    const paged = paginate(sorted, page);
+
+    state.page = paged.page;
+    state.total = paged.total;
+    state.totalPages = paged.totalPages;
+    state.ideas = paged.ideas;
+
+    render();
+  }
+
+  function render() {
+    elIdeas.innerHTML = "";
+
+    elHeading.textContent = state.sortMode === "new" ? "New ideas" : "Top ideas";
+
+    const q = state.query.trim();
+    elListMeta.textContent = q
+      ? `${state.total} result${state.total === 1 ? "" : "s"} • “${q}”`
+      : `${state.total} idea${state.total === 1 ? "" : "s"}`;
+
+    elPageInfo.textContent = `Page ${state.page} of ${state.totalPages}`;
+
+    elPrev.disabled = state.page <= 1;
+    elNext.disabled = state.page >= state.totalPages;
+
+    const votesMap = loadVotesMap();
+
+    if (!state.ideas.length) {
+      const empty = document.createElement("div");
+      empty.className = "idea";
+      empty.innerHTML = `
+        <div class="ideaMain">
+          <h3 class="ideaTitle">${q ? "No matches" : "No ideas yet"}</h3>
+          <p class="ideaDesc">${q ? "Try a different search." : "Click “Submit Idea” to add the first one."}</p>
+        </div>
+      `;
+      elIdeas.appendChild(empty);
+      return;
+    }
+
+    for (const idea of state.ideas) {
+      const row = document.createElement("div");
+      row.className = "idea";
+
+      const votesLine = `${idea.upvotes} up • ${idea.downvotes} down`;
+      const hasVoted = !!votesMap[String(idea.id)];
+
+      row.innerHTML = `
+        <div class="voteCol">
+          <div class="score">${idea.score}<small>${votesLine}</small></div>
+          <div class="voteBtns">
+            <div class="voteBtn up ${hasVoted ? "disabled" : ""}" title="Upvote" role="button" aria-label="Upvote">▲</div>
+            <div class="voteBtn down ${hasVoted ? "disabled" : ""}" title="Downvote" role="button" aria-label="Downvote">▼</div>
+          </div>
+        </div>
+        <div class="ideaMain">
+          <h3 class="ideaTitle"></h3>
+          <p class="ideaDesc"></p>
+          <div class="ideaFoot">
+            <span>#${idea.id}</span>
+            <span>•</span>
+            <span>${fmtDate(idea.created_at)}</span>
+            <span>•</span>
+            <span>Submitted by ${escapeHtml(idea.name || "Anonymous")}</span>
+            ${hasVoted ? `<span>•</span><span>voted</span>` : ``}
+          </div>
+        </div>
+      `;
+
+      row.querySelector(".ideaTitle").textContent = idea.title;
+      row.querySelector(".ideaDesc").textContent = idea.description;
+
+      const upBtn = row.querySelector(".voteBtn.up");
+      const downBtn = row.querySelector(".voteBtn.down");
+
+      upBtn.addEventListener("click", () => { if (!hasVoted) vote(idea.id, 1); });
+      downBtn.addEventListener("click", () => { if (!hasVoted) vote(idea.id, -1); });
+
+      elIdeas.appendChild(row);
+    }
+  }
+
+  function nextIdeaId(ideas) {
+    let max = 0;
+    for (const i of ideas) max = Math.max(max, i.id || 0);
+    return max + 1;
+  }
+
+  function submitIdea() {
+    const name = elName.value.trim();
+    const title = elTitle.value.trim();
+    const description = elDesc.value.trim();
+
+    if (name.length < 2 || name.length > 60) return showToast("Name must be 2–60 characters.");
+    if (title.length < 3 || title.length > 120) return showToast("Title must be 3–120 characters.");
+    if (description.length < 10 || description.length > 2000) return showToast("Description must be 10–2000 characters.");
+
+    const ideas = loadAllIdeas();
+    const id = nextIdeaId(ideas);
+
+    ideas.push({
+      id,
+      name,
+      title,
+      description,
+      score: 0,
+      upvotes: 0,
+      downvotes: 0,
+      created_at: Date.now()
+    });
+
+    saveAllIdeas(ideas);
+
+    elName.value = "";
+    elTitle.value = "";
+    elDesc.value = "";
+
+    closeModal();
+    refresh(1);
+  }
+
+  function vote(ideaId, value) {
+    const votesMap = loadVotesMap();
+    const key = String(ideaId);
+
+    if (votesMap[key]) {
+      showToast("You already voted on this idea.");
+      return;
+    }
+
+    const ideas = loadAllIdeas();
+    const idx = ideas.findIndex(i => i.id === ideaId);
+    if (idx === -1) return;
+
+    if (value === 1) {
+      ideas[idx].score += 1;
+      ideas[idx].upvotes += 1;
+    } else {
+      ideas[idx].score -= 1;
+      ideas[idx].downvotes += 1;
+    }
+
+    votesMap[key] = value;
+    saveVotesMap(votesMap);
+    saveAllIdeas(ideas);
+
+    // no toast on successful vote
+    refresh(state.page);
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function openModal() {
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    setTimeout(() => elName.focus(), 0);
+  }
+
+  function closeModal() {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  function setSortMode(mode) {
+    state.sortMode = mode;
+    btnTop.classList.toggle("active", mode === "top");
+    btnNew.classList.toggle("active", mode === "new");
+    refresh(1);
+  }
+
+  btnTop.addEventListener("click", () => setSortMode("top"));
+  btnNew.addEventListener("click", () => setSortMode("new"));
+
+  let searchTimer = null;
+  elSearch.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      state.query = elSearch.value || "";
+      refresh(1);
+    }, 120);
+  });
+
+  // Modal handlers
+  btnOpen.addEventListener("click", openModal);
+  btnClose.addEventListener("click", closeModal);
+  btnCancel.addEventListener("click", closeModal);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+  });
+
+  btnSubmit.addEventListener("click", submitIdea);
+
+  // Pager
+  elPrev.addEventListener("click", () => refresh(state.page - 1));
+  elNext.addEventListener("click", () => refresh(state.page + 1));
+
+  // Seed examples once
+  (function seedIfEmpty(){
+    const ideas = loadAllIdeas();
+    if (ideas.length) return;
+
+    const now = Date.now();
+    const seeded = [
+      {
+        id: 1,
+        name: "Alex",
+        title: "Let me use my personal ChatGPT account inside Josh",
+        description:
+          "I want the option to connect my own ChatGPT account so Josh can use my existing preferences, custom instructions, and history. This should be opt-in, clearly separated from Josh.ai defaults, and easy to disconnect at any time.",
+        score: 9,
+        upvotes: 9,
+        downvotes: 0,
+        created_at: now - (3 * 86400000)
+      },
+      {
+        id: 2,
+        name: "Brian",
+        title: "Integrate with NVIDIA Shield for faster, cleaner media control",
+        description:
+          "Add native integration for NVIDIA Shield so users can launch apps, control playback, and manage inputs reliably. Ideally this includes fast wake, better state awareness, and smoother voice control for common streaming workflows.",
+        score: 5,
+        upvotes: 5,
+        downvotes: 0,
+        created_at: now - (2 * 86400000)
+      },
+      {
+        id: 3,
+        name: "Maria",
+        title: "Josh should speak Spanish (and switch languages naturally)",
+        description:
+          "Enable Spanish voice responses and understanding, with a simple setting to choose language per user or per room. Bonus if Josh can detect Spanish vs English and respond in the same language without extra commands.",
+        score: 2,
+        upvotes: 2,
+        downvotes: 0,
+        created_at: now - (1 * 86400000)
+      },
+      {
+        id: 4,
+        name: "Chris",
+        title: "Add folders for Scenes so we can organize by room or use-case",
+        description:
+          "As scene libraries grow, it gets hard to find the right one quickly. Add folders (or tags) so I can group scenes by room, time-of-day, or purpose like ‘Entertaining’, ‘Morning’, or ‘Kids’.",
+        score: 0,
+        upvotes: 0,
+        downvotes: 0,
+        created_at: now
+      }
+    ];
+    saveAllIdeas(seeded);
+  })();
+
+  setSortMode("top");
+  refresh(1);
+</script>
+</body>
+</html>
